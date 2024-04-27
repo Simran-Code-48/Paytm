@@ -37,12 +37,17 @@ function getBankDetails(bankname){
     return { id : 1000002, url : "netbanking.sbibank.com/netbanking/"};
   }
 }
-app.get('/', async(req, res) => {
-  
-  await connectToDatabase(()=> {
-    res.json({message: "hello"})
-  })
-})
+app.get('/', async (req, res) => {
+  // Assuming connectToDatabase is an asynchronous function
+  try {
+    await connectToDatabase(); // Wait for the database connection to be established
+    res.json({ message: "hello" });
+  } catch (error) {
+    console.error("Error connecting to the database:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Send money to another person
 app.post('/paytm/transfer/:id', async (req, res) => {
     const userId = req.params.id;
