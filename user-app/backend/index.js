@@ -15,15 +15,16 @@ const port = 3001;
 let con;
 async function connectToDatabase() {
   try {
-      con = await mysql.createConnection(
-        // 'mysql://simran:1234@127.0.0.1:3306/paytm1'
-        {Host:"pay-transactions-simran48-testing.d.aivencloud.com",
+    con = await mysql.createConnection(
+      // "mysql://simran:1234@127.0.0.1:3306/paytm1"
+      {Host:"pay-transactions-simran48-testing.d.aivencloud.com",
         Port:26272,
         User:"avnadmin",
-        Password:"AVNS_vSFi3GqvcFgfV_DhLB4"});
-      console.log('Connected to the database');
+        Password:"AVNS_vSFi3GqvcFgfV_DhLB4"}
+    );
+    console.log("Connected to the database");
   } catch (error) {
-      console.error('Failed to connect to the database:', error);
+    console.error("Failed to connect to the database:", error);
   }
 }
 connectToDatabase();
