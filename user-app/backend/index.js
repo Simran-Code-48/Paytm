@@ -17,11 +17,12 @@ async function connectToDatabase() {
   try {
     con = await mysql.createConnection(
       // "mysql://simran:1234@127.0.0.1:3306/paytm1"
-      {Host:"pay-transactions-simran48-testing.d.aivencloud.com",
-        Port:26272,
-        User:"avnadmin",
-        Password:"AVNS_vSFi3GqvcFgfV_DhLB4"}
+      {host:"pay-transactions-simran48-testing.d.aivencloud.com",
+        port:26272,
+        user:"avnadmin",
+        password:"AVNS_vSFi3GqvcFgfV_DhLB4"}
     );
+    await con.query('Use defaultdb')
     console.log("Connected to the database");
   } catch (error) {
     console.error("Failed to connect to the database:", error);
@@ -90,7 +91,7 @@ app.post('/paytm/transfer/:id', async (req, res) => {
 app.get('/paytm/transactions/:id', async (req, res) => {
     const userId = req.params.id;
     try {
-      const [transactions, transactions_field] = await con.query('Select * from transactions where sender = ? OR receiver = ?',[userId, userId]);
+      const [transactions, transactions_field] = await con.query('Select * from Transactions where sender = ? OR receiver = ?',[userId, userId]);
       // console.log(transactions);
     const formattedTransactions = transactions.map(async transaction => {
         const isSender = userId == transaction.sender;
