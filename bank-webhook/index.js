@@ -13,7 +13,11 @@ let con;
 async function connectToDatabase() {
   try {
     con = await mysql.createConnection(
-      "mysql://simran:1234@127.0.0.1:3306/paytm1"
+      // "mysql://simran:1234@127.0.0.1:3306/paytm1"
+      {Host:"pay-transactions-simran48-testing.d.aivencloud.com",
+        Port:26272,
+        User:"avnadmin",
+        Password:"AVNS_vSFi3GqvcFgfV_DhLB4"}
     );
     console.log("Connected to the database");
   } catch (error) {
