@@ -133,6 +133,7 @@ app.post('/paytm/addmoney/:id', async (req, res) => {
 });
 
 // Retrieve transaction history
+// Transactions
 app.get('/paytm/transactions/:id', async (req, res) => {
   const userId = req.params.id;
 
@@ -140,14 +141,35 @@ app.get('/paytm/transactions/:id', async (req, res) => {
   try {
     connection = await pool.getConnection();
 
-    // Perform database operations using the connection
-    // Example: await connection.query(...);
-
-    // Return the formatted transaction history
+    const [transactions, transactions_field] = await connection.query('Select * from Transactions where sender = ? OR receiver = ?', [userId, userId]);
+    
+    const formattedTransactions = transactions.map(async transaction => {
+        const isSender = userId == transaction.sender;
+        let description = transaction.description;
+        if (description === 'Send Money') {
+            if (isSender) {
+                const receiverInfo = await connection.query('SELECT username FROM Users WHERE id = ?', [transaction.receiver]);
+                const receiverUsername = receiverInfo[0][0].username;
+                description = `Send Money to ${receiverUsername}`;
+            } else {
+                const senderInfo = await connection.query('SELECT username FROM Users WHERE id = ?', [transaction.sender]);
+                const senderUsername = senderInfo[0][0].username;
+                description = `Receive Money from ${senderUsername}`;
+            }
+        }
+        const date_time = new Date(transaction.date_time);
+        const date = date_time.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+        const time = date_time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const amount = isSender ? -transaction.amount : transaction.amount;
+        const balance = isSender ? transaction.sender_balance : transaction.receiver_balance;
+        const status = transaction.status;
+        return { description, date, time, amount, balance, status };
+    });
+    const formattedTransactionsResult = await Promise.all(formattedTransactions);
     res.json(formattedTransactionsResult);
   } catch (error) {
-    console.error('Error fetching and formatting transaction data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+      console.error('Error fetching and formatting transaction data:', error);
+      res.status(500).json({ error: 'Internal server error' });
   } finally {
     if (connection) {
       connection.release(); // Release the connection back to the pool
