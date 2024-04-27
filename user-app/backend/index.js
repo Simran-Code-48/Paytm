@@ -37,6 +37,9 @@ function getBankDetails(bankname){
     return { id : 1000002, url : "netbanking.sbibank.com/netbanking/"};
   }
 }
+app.get('/', async(req, res) => {
+  res.json({message: "hello"})
+})
 // Send money to another person
 app.post('/paytm/transfer/:id', async (req, res) => {
     const userId = req.params.id;
