@@ -1,0 +1,35 @@
+.profile-container {
+	display: flex;
+	align-items: center;
+	margin-top: 20px;
+  }
+  
+  .profile-image-container {
+	margin-right: 20px;
+  }
+  
+  .profile-image {
+	width: 150px;
+	height: 150px;
+	border-radius: 10%;
+	object-fit: cover;
+  }
+  
+  .profile-info {
+	margin-left: 20px;
+  }
+  
+  .profile-name {
+	margin-top: 0;
+	font-size: 24px;
+  }
+  
+  .profile-details {
+	margin-top: 10px;
+  }
+  
+  .profile-detail {
+	margin: 5px 0;
+	font-size: 18px;
+  }
+  
