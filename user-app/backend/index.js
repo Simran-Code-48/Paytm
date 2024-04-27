@@ -38,7 +38,10 @@ function getBankDetails(bankname){
   }
 }
 app.get('/', async(req, res) => {
-  res.json({message: "hello"})
+  
+  await connectToDatabase(()=> {
+    res.json({message: "hello"})
+  })
 })
 // Send money to another person
 app.post('/paytm/transfer/:id', async (req, res) => {
