@@ -10,7 +10,7 @@ import AddMoney from './pages/AddMoney';
 import ProfilePage from './pages/ProfilePage';
 
 const App = () => {
-  const user = 'Harkirat'
+  const user = 'Simran'
   const handleClick = () => {
     console.log('Button clicked!');
   };
