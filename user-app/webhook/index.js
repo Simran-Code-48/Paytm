@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 let con;
 async function connectToDatabase() {
   try {
-      con = await mysql.createConnection('mysql://simran:1234@127.0.0.1:3306/paytm1');
+      con = await mysql.createConnection();
       console.log('Connected to the database');
   } catch (error) {
       console.error('Failed to connect to the database:', error);
