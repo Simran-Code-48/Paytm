@@ -10,7 +10,7 @@ const RED = "\x1b[31m";
 const app = express();
 app.use(cors())
 app.use(bodyParser.json())
-const port = 3001;
+const port = 3001; 
 //1. connect to database
 let con;
 async function connectToDatabase() {
