@@ -189,8 +189,8 @@
 		  'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-		  userBankId: bankUserId,
-		  userBankPin: bankUserPin
+		  userBankId: Number(bankUserId),
+		  userBankPin: Number(bankUserPin)
 		})
 	  })
 	  .then(response => response.json())

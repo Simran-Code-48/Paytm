@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from './components/Button';
 import Appbar from './components/Appbar';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Hero from './components/Hero';
 import Balance from './components/Balance';
 import Transactions from './pages/Transactions';
@@ -19,12 +19,19 @@ const App = () => {
     <div >
       <BrowserRouter>
       <Appbar/>
-      <Hero user={user}/>
+      <Routes>
+          <Route path="/" element={<><Hero user={user}/><Balance/><Transactions/></>} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/transfer" element={<Transfer />} />
+          <Route path="/add-money" element={<AddMoney />} />
+          {/* Add more routes for other pages as needed */}
+        </Routes>
+      {/* <Hero user={user}/>
       <ProfilePage/>
       <AddMoney/>
-      <Transfer/> 
-      <Balance/>
-      <Transactions/>
+      <Transfer/>  */}
+      
       </BrowserRouter>
     </div>
   );

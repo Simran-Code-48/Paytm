@@ -13,13 +13,8 @@ let con;
 async function connectToDatabase() {
   try {
     con = await mysql.createConnection(
-      // "mysql://simran:1234@127.0.0.1:3306/paytm1"
-      {host:"pay-transactions-simran48-testing.d.aivencloud.com",
-        port:26272,
-        user:"avnadmin",
-        password:"AVNS_vSFi3GqvcFgfV_DhLB4"}
-    );
-    await con.query('Use defaultdb')
+      "mysql://simran:1234@127.0.0.1:3306/paytm1")
+    // await con.query('Use defaultdb')
     console.log("Connected to the database");
   } catch (error) {
     console.error("Failed to connect to the database:", error);
@@ -30,7 +25,7 @@ connectToDatabase();
 //paytm data
 const paytm_token = "paytm-hdfc-token";
 const paytmAccountId = 1001;
-const otherBackendURL = "http://localhost:8090/paytm.webhook"; // Replace with the actual URL
+const otherBackendURL = "http://localhost:3001/paytm/webhook"; // Replace with the actual URL
 const tokens_amount = [];
 
 // Route for token generation
@@ -41,58 +36,6 @@ app.post("/hdfcbank.com/tokengeneration/", async (req, res) => {
   tokens_amount.push({ token, amount, txnId });
   res.status(200).json({ token });
 });
-// app.post('/netbanking.hdfcbank.com/netbanking/:token', async (req, res) => {
-//     const token = req.params.token;
-//     const { userBankId, userBankPin } = req.body;
-
-//     try {
-//         const [user] = await con.query('SELECT * FROM BankUsers WHERE id = ? AND pin = ?', [userBankId, userBankPin]);
-//         if (!user) {
-//             return res.status(401).json({ error: 'Invalid credentials' });
-//         }
-
-//         const tokenEntry = tokens_amount.find(entry => entry.token === token);
-//         if (!tokenEntry) {
-//             return res.status(404).json({ error: 'Token not found' });
-//         }
-
-//         const amount = tokenEntry.amount;
-//         if (user.balance < amount) {
-//             return res.status(400).json({ error: 'Insufficient balance' });
-//         }
-
-//         await con.beginTransaction();
-
-//         // Insert transaction into BankTransactions table
-//         const transactionInsert = await con.query(
-//             `INSERT INTO BankTransactions (sender, receiver, amount, sender_balance, receiver_balance)
-//             VALUES (?, ?, ?, ?, ?)`, [userBankId, paytmAccountId, amount, user[0].balance - amount, paytmAccountId, user[0].balance - amount]
-//         );
-//         const transactionId = transactionInsert.insertId;
-
-//         // Update sender's balance
-//         await con.query('UPDATE BankUsers SET balance = balance - ? WHERE id = ?', [amount, userBankId]);
-
-//         // Update receiver's balance (Paytm account)
-//         await con.query('UPDATE BankUsers SET balance = balance + ? WHERE id = ?', [amount, paytmAccountId]);
-
-//         // Update transaction status
-//         await con.query('UPDATE BankTransactions SET status = ? WHERE id = ?', ['success', transactionId]);
-
-//         // Commit transaction
-//         await con.commit();
-
-//         // Notify other backend about successful transaction
-//         await axios.post(otherBackendURL, { status: 'success', txnId: transactionId });
-
-//         res.status(200).json({ message: 'Transaction successful' });
-//     } catch (error) {
-//         // Rollback transaction in case of error
-//         await con.rollback();
-//         console.error('Error processing transaction:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//     }
-// });
 
 app.post("/netbanking.hdfcbank.com/netbanking/:token", async (req, res) => {
   const token = req.params.token;
@@ -154,6 +97,109 @@ app.post("/netbanking.hdfcbank.com/netbanking/:token", async (req, res) => {
     console.error("Error processing transaction:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+const express = require("express");
+const mysql = require("mysql2/promise");
+const bodyParser = require("body-parser");
+const axios = require("axios");
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
+
+const app = express();
+const port = 3000;
+app.use(cors())
+app.use(bodyParser.json());
+let con;
+async function connectToDatabase() {
+  try {
+    con = await mysql.createConnection(
+      "mysql://simran:1234@127.0.0.1:3306/paytm1")
+    // await con.query('Use defaultdb')
+    console.log("Connected to the database");
+  } catch (error) {
+    console.error("Failed to connect to the database:", error);
+  }
+}
+connectToDatabase();
+
+//paytm data
+const paytm_token = "paytm-hdfc-token";
+const paytmAccountId = 1001;
+const otherBackendURL = "http://localhost:3001/paytm/webhook"; // Replace with the actual URL
+const tokens_amount = [];
+
+// Route for token generation
+app.post("/hdfcbank.com/tokengeneration/", async (req, res) => {
+  const { userId, txnId, amount } = req.body;
+  console.log({ userId, txnId, amount });
+  const token = jwt.sign({ userId, txnId, amount }, paytm_token); // Replace paytm_secret with your actual secret key
+  tokens_amount.push({ token, amount, txnId });
+  res.status(200).json({ token });
+});
+
+app.post("/netbanking.hdfcbank.com/netbanking/:token", async (req, res) => {
+  const token = req.params.token;
+  const { userBankId, userBankPin } = req.body;
+  console.log({ userBankId, userBankPin });
+
+  try {
+    const [user] = await con.query(
+      "SELECT * FROM BankUsers WHERE id = ? AND pin = ?",
+      [userBankId, userBankPin]
+    );
+    if (user.length == 0) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    const tokenEntry = tokens_amount.find((entry) => entry.token === token);
+    if (!tokenEntry) {
+      return res.status(404).json({ error: "Token not found" });
+    }
+    console.log(user);
+    const amount = tokenEntry.amount;
+    if (user[0].balance < amount) {
+      return res.status(400).json({ error: "Insufficient balance" });
+    }
+    const [transactionInsert, txnfields] = await con.query(
+      `INSERT INTO BankTransactions (sender, receiver, amount, sender_balance, receiver_balance) 
+            VALUES (?, ?, ?, ?, (SELECT balance from BankUsers where id = ?) + ?)`,
+      [
+        userBankId,
+        paytmAccountId,
+        amount,
+        user[0].balance - amount,
+        paytmAccountId,
+        amount,
+      ]
+    );
+    const transactionId = transactionInsert.insertId;
+    await con.beginTransaction();
+    await con.query("UPDATE BankUsers SET balance = balance - ? WHERE id = ?", [
+      amount,
+      userBankId,
+    ]);
+    await con.query("UPDATE BankUsers SET balance = balance + ? WHERE id = ?", [
+      amount,
+      paytmAccountId,
+    ]);
+    await con.query(
+      'UPDATE BankTransactions SET status = "success" WHERE id = ?',
+      [transactionId]
+    );
+    await con.commit();
+    await axios.post(otherBackendURL, {
+      status: "success",
+      txnId: tokenEntry.txnId,
+    });
+
+    res.status(200).json({ message: "Transaction successful" });
+  } catch (error) {
+    await con.rollback();
+    console.error("Error processing transaction:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.listen(port, () => {
+  console.log("HDFC webhook running on PORT " + port);
 });
 
 // app.post('/netbanking.hdfcbank.com/netbanking/:token', async (req, res) => {

@@ -61,6 +61,45 @@ app.post('/paytm.webhook', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+app.post('/paytm/webhook', async (req, res) => {
+    try {
+        console.log('Received webhook payload:', req.body);
+        const { txnId } = req.body;
+        const transaction = await Transaction.findOne({ _id: txnId, status: 'pending' });
+
+        if (!transaction) {
+            return res.status(404).json({ error: 'Transaction not found or already processed' });
+        }
+
+        const { amount, receiver } = transaction;
+
+        try {
+            // Begin transaction
+            const session = await mongoose.startSession();
+            session.startTransaction();
+
+            // Update user balance
+            await User.updateOne({ _id: receiver }, { $inc: { balance: amount } });
+
+            // Update transaction status
+            await Transaction.updateOne({ _id: txnId }, { status: 'success' });
+
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({ message: 'Transaction successful' });
+        } catch (e) {
+            // Rollback transaction on error
+            await session.abortTransaction();
+            console.error('Error processing transaction:', e);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    } catch (error) {
+        console.error('Error processing webhook payload:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Paytm Webhook runnning on PORT ${port}`);
 });
