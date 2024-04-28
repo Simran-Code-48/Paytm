@@ -16,8 +16,11 @@ let con;
 async function connectToDatabase() {
   try {
     con = await mysql.createConnection(
-     
-    );
+      {host:"pay-transactions-simran48-testing.d.aivencloud.com",
+      port:26272,
+      user:"avnadmin",
+      password:"AVNS_vSFi3GqvcFgfV_DhLB4"}
+  );
     await con.query('Use defaultdb')
     console.log("Connected to the database");
   } catch (error) {
